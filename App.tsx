@@ -5,7 +5,7 @@ function App(): React.JSX.Element {
 
   return (
     <SafeAreaProvider>
-      <AppNavigator />
+        <AppNavigator />
     </SafeAreaProvider>
 
   );

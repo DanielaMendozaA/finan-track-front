@@ -1,15 +1,66 @@
 
-import React from 'react'
-import { Alert, Image, KeyboardAvoidingView, Platform, StyleSheet, ScrollView, View, Dimensions } from 'react-native'
-import ReusableForm from '../../components/molecules/ReusableForm';
+import React, { useState } from 'react'
+import { Alert, Image, KeyboardAvoidingView, Platform, StyleSheet, ScrollView, View, Dimensions, ActivityIndicator } from 'react-native'
 import { Theme, useNavigation, useTheme } from '@react-navigation/native';
-import { LoginNavigationProp } from '../../navigation/types/types';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-export const RegisterScreen = () => {
+import ReusableForm from '../../components/molecules/ReusableForm';
+import { LoginNavigationProp } from '../../navigation/types/types';
+import useSubmitRegister from '../../hooks/auth/useSubmitRegister';
+import { IRegisterUser } from '../../services/auth/interfaces/register-user.interface';
+import { CustomModalConfirmComponent } from '../../components/molecules/CustomModal';
+
+
+
+interface DefaultFormValues {
+    name: string;
+    email: string;
+    password: string;
+}
+
+const RegisterScreen = () => {
+    const [isModalConfirmVisible, setIsModalConfirmVisible] = useState<boolean>(false);
+    const [defaultFormValues, setDefaultFormValues] = useState<DefaultFormValues>({
+        name: '',
+        email: '',
+        password: ''
+    })
+
+    const navigation = useNavigation<LoginNavigationProp>();
+
     const theme = useTheme();
     const styles = createStyles(theme);
 
-    const navigation = useNavigation<LoginNavigationProp>();
+    const { submitRegister, errorText, openModalError, setOpenModalError, loading } = useSubmitRegister();
+
+    const handleSubmit = (formData: IRegisterUser) => {
+        console.log("estos son los datos enviados", formData);
+        
+        submitRegister(formData, () => {
+            setIsModalConfirmVisible(true)
+            setDefaultFormValues({
+                name: formData.name,
+                email: formData.email,
+                password: formData.password
+            })
+        });
+    };
+
+
+    const closeModalError = () => {
+        setOpenModalError(false);
+    };
+
+    const handleCloseModalConfirm = () => {
+        setIsModalConfirmVisible(false)
+
+        console.log("default values", defaultFormValues);
+        navigation.navigate('Login', defaultFormValues);
+    }
+
+    if (loading) {
+        return <ActivityIndicator size="large" color="#0000ff" />;
+    }
 
     const inputs = [
         {
@@ -18,20 +69,24 @@ export const RegisterScreen = () => {
             placeholder: "Ingresa tu correo",
             rules: {
                 required: true,
-                pattern: {
-                    value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                    message: 'Email inválido'
-                }
-            }
+                // pattern: {
+                //     value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                //     message: 'Email inválido'
+                // }
+            },
+            iconName: "email",
+            iconLibrary: MaterialIcons,
 
         },
         {
-            name: "username",
+            name: "name",
             type: "text",
             placeholder: "Ingresa tu nombre",
             rules: {
                 required: true
-            }
+            },
+            iconName: "people",
+            iconLibrary: MaterialIcons,
 
         },
 
@@ -44,14 +99,12 @@ export const RegisterScreen = () => {
                 required: true,
                 pattern: { value: /(?:(?=.*\d)(?=.*\W+)(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*)/, message: 'La contraseña debe tener al menos una letra mayúscula, una minúscula, un número y un carácter especial' }
             },
+            iconName: "password",
+            iconLibrary: MaterialIcons,
         },
 
 
     ]
-
-    const handleSubmit = (data: any) => {
-        Alert.alert("Datos enviados", JSON.stringify(data));
-    };
 
     return (
         <KeyboardAvoidingView
@@ -72,15 +125,30 @@ export const RegisterScreen = () => {
                         navLink={{
                             path: "Login",
                             text: "Iniciar Sesión",
-                            onPress: () => navigation.navigate("Login"),
+                            onPress: () => navigation.navigate("Login", { email: '', password: '' }),
                         }}
                     />
+
+                    <CustomModalConfirmComponent
+                        visible={isModalConfirmVisible}
+                        onClose={handleCloseModalConfirm}
+                        text='Para completar el registro, confirme el enlace enviado a su correo electrónico.'
+                    />
+
+                    {openModalError && (
+                        <CustomModalConfirmComponent
+                            visible={openModalError}
+                            onClose={closeModalError}
+                            text={`Error: ${errorText}`}
+                        />
+                    )}
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
     )
 }
 
+export default RegisterScreen
 
 const { width, height } = Dimensions.get('window');
 const createStyles = (theme: Theme) =>

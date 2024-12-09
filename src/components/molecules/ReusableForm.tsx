@@ -4,6 +4,7 @@ import { View, Text, TextInput, Switch, StyleSheet, TouchableOpacity } from "rea
 import { Picker } from '@react-native-picker/picker';
 import { Theme, useTheme } from "@react-navigation/native";
 import { Dimensions } from 'react-native';
+import CustomButton from "../atoms/CustomTouchableButton";
 
 interface IInput {
     name: string;
@@ -12,6 +13,8 @@ interface IInput {
     placeholder?: string;
     options?: { label: string; value: string }[];
     rules?: object;
+    iconName?: string;
+    iconLibrary?: any;
 }
 
 interface IFormProps {
@@ -19,10 +22,14 @@ interface IFormProps {
     onSubmit: (data: any) => void;
     buttonText: string;
     navLink?: { path: string; text: string; onPress: () => void };
+    defaultValues?: any;
+    style?: object;
 }
 
-const ReusableForm = ({ inputs, onSubmit, buttonText, navLink }: IFormProps) => {
-    const { control, handleSubmit, formState: { errors } } = useForm();
+const ReusableForm = ({ inputs, onSubmit, buttonText, navLink, defaultValues, style  }: IFormProps) => {
+    const { control, handleSubmit, formState: { errors } } = useForm({
+        defaultValues
+    });
     const theme = useTheme()
     const fontStyles = theme.fonts.heavy;
     const styles = createStyles(theme)
@@ -38,7 +45,7 @@ const ReusableForm = ({ inputs, onSubmit, buttonText, navLink }: IFormProps) => 
     return (
         <View style={styles.form}>
             {inputs.map((input, index) => (
-                <View key={index}>
+                <View key={index} style={[styles.form, style]}>
                     <Text style={styles.label}>{input.label}</Text>
 
                     <Controller
@@ -49,14 +56,24 @@ const ReusableForm = ({ inputs, onSubmit, buttonText, navLink }: IFormProps) => 
                             switch (input.type) {
                                 case "text":
                                     return (
-                                        <TextInput
-                                            style={styles.input}
-                                            placeholder={input.placeholder}
-                                            placeholderTextColor={theme.colors.text}
-                                            onBlur={onBlur}
-                                            onChangeText={onChange}
-                                            value={value}
-                                        />
+                                        <View style={styles.containerIcon}>
+                                            {input.iconName && input.iconLibrary && (
+                                                <input.iconLibrary
+                                                    name={input.iconName}
+                                                    size={20}
+                                                    color={theme.colors.text}
+                                                    style={styles.inputIcon}
+                                                />
+                                            )}
+                                            <TextInput
+                                                style={[styles.input]}
+                                                placeholder={input.placeholder}
+                                                placeholderTextColor={theme.colors.text}
+                                                onBlur={onBlur}
+                                                onChangeText={onChange}
+                                                value={value}
+                                            />
+                                        </View>
                                     );
 
                                 case "textarea":
@@ -96,15 +113,25 @@ const ReusableForm = ({ inputs, onSubmit, buttonText, navLink }: IFormProps) => 
 
                                 case "password":
                                     return (
-                                        <TextInput
-                                            style={styles.input}
-                                            placeholder={input.placeholder}
-                                            placeholderTextColor={theme.colors.text}
-                                            onBlur={onBlur}
-                                            onChangeText={onChange}
-                                            value={value}
-                                            secureTextEntry
-                                        />
+                                        <View style={styles.containerIcon}>
+                                            {input.iconName && input.iconLibrary && (
+                                                <input.iconLibrary
+                                                    name={input.iconName}
+                                                    size={20}
+                                                    color={theme.colors.text}
+                                                    style={styles.inputIcon}
+                                                />
+                                            )}
+                                            <TextInput
+                                                style={[styles.input]}
+                                                placeholder={input.placeholder}
+                                                placeholderTextColor={theme.colors.text}
+                                                onBlur={onBlur}
+                                                onChangeText={onChange}
+                                                value={value}
+                                                secureTextEntry
+                                            />
+                                        </View>
                                     );
 
                                 case "radio":
@@ -139,14 +166,25 @@ const ReusableForm = ({ inputs, onSubmit, buttonText, navLink }: IFormProps) => 
                     )}
                 </View>
             ))}
-            <TouchableOpacity onPress={handleSubmit(onSubmit)} style={styles.touchableButton}>
-                <Text style={[styles.button, fontStyles]}>{buttonText}</Text>
-            </TouchableOpacity>
-            {navLink && (
-                <TouchableOpacity onPress={navLink.onPress} style={styles.navLink}>
-                    <Text style={styles.navLinkText}>{navLink.text}</Text>
-                </TouchableOpacity>
-            )}
+
+
+                <CustomButton
+                    title={buttonText}
+                    onPress={handleSubmit(onSubmit)}
+                    style={styles.buttonSend}
+
+                />
+
+                {navLink && (
+
+                    <CustomButton
+                        title={navLink.text}
+                        onPress={navLink.onPress}
+                        style={styles.navLink}
+                        textStyle={styles.textButton}
+
+                    />
+                )}
         </View>
     );
 };
@@ -157,20 +195,35 @@ const { width, height } = Dimensions.get('window');
 const createStyles = (theme: Theme) =>
     StyleSheet.create({
         form: {
-            padding: 10,
-            gap: 10
+            // padding: 10,
+            // gap: 10,
+            justifyContent: "center",
+            alignItems: "center"
         },
         label: {
             marginBottom: 5,
             color: theme.colors.text
         },
-        input: {
+        buttonSend:{
+            marginTop: 35
+        },
+        containerIcon: {
+            flexDirection: "row",
+            alignItems: "center",
             borderWidth: 1,
             borderColor: theme.colors.border,
             borderRadius: 10,
-            padding: 25,
+            paddingHorizontal: 10,
+            // marginBottom: 10,
+            width: width * 0.88,
+            height: height * 0.1
+        },
+        inputIcon: {
+            marginRight: 10,
+        },
+        input: {
+            // paddingVertical: 10,
             color: theme.colors.text,
-            width: width * 0.88
         },
         textarea: {
             height: 100,
@@ -189,22 +242,12 @@ const createStyles = (theme: Theme) =>
             padding: 10
         },
         navLink: {
-            marginTop: 20,
             alignSelf: "center",
+            backgroundColor: theme.colors.background,
         },
-        touchableButton: {
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: 10
-        },
-        button: {
-            backgroundColor: theme.colors.border,
-            padding: 15,
-            textAlign: "center",
-            width: '70%',
-            borderRadius: 15,
-            fontWeight: "bold",
-            fontSize: 18
+        textButton: {
+            color: theme.colors.text,
+            fontSize: 20,
         },
         navLinkText: {
             color: theme.colors.text,

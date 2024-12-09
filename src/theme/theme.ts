@@ -76,9 +76,9 @@ export const darkTheme: Theme = {
     dark: true,
     colors: {
         background: '#1D1738',
-        text: '#c2ddd9',
+        text: '#F8EDE3',
         primary: '#d18b77',
-        card: '#8fd9d8',
+        card: '#2D2552',
         notification: '#c9b2ea',
         border: '#FCD190',
     },
