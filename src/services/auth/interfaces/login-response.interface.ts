@@ -12,4 +12,5 @@ export interface IData {
 export interface IUser {
     email: string;
     id:    string;
+    isVerified: boolean;
 }

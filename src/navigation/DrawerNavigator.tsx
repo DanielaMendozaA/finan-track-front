@@ -11,7 +11,6 @@ import CustomButton from '../components/atoms/CustomTouchableButton';
 import { AppDispatch } from '../redux/store';
 import { useDispatch } from 'react-redux';
 import { removeToken } from '../redux/features/userThunks';
-import { useAuth } from '../context/auth.context';
 import { ThemeContext } from '../theme/theme.context';
 
 
@@ -24,7 +23,6 @@ const CustomDrawerContent = () => {
         title: 'Modo Oscuro',
         iconName: 'dark-mode'
     });
-    const { signOut } = useAuth();
 
 
     useEffect(() => {
@@ -45,7 +43,7 @@ const CustomDrawerContent = () => {
         console.log("Cerrando sesión...");
         await dispatch(removeToken());
         await AsyncStorage.clear();
-        signOut()
+
     };
 
     const handleToggle = () => {

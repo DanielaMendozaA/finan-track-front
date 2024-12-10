@@ -3,8 +3,6 @@ import { useFetchGetBudgets } from '../../hooks/budgets/useFetchGetBudgets'
 import { ActivityIndicator, Dimensions, StyleSheet, Text, View } from 'react-native';
 import { Theme, useTheme } from '@react-navigation/native';
 import ReusableFlatList from '../molecules/CustomFlatList';
-import { ScrollView } from 'react-native-gesture-handler';
-import CustomButton from '../atoms/CustomTouchableButton';
 import { IBudget } from '../../services/budgets/interfaces/get-all-budgets-response.interface';
 
 export const FrequencyList = () => {
@@ -14,7 +12,6 @@ export const FrequencyList = () => {
     const styles = createStyles(theme)
 
     const renderItem = ({ item }: { item: IBudget }) => {
-        console.log(typeof(item.startDate))
         const startDataObject = new Date(item.startDate)
         const startDate = startDataObject.toISOString().split('T')[0]
 

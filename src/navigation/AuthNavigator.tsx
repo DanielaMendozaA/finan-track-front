@@ -1,15 +1,10 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { RootStackParamList } from './types/types';
 import LoginScreen from '../screens/public/Login.screen';
 import RegisterScreen from '../screens/public/Register.screen';
-import HomeScreen from '../screens/private/Home.screen';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ActivityIndicator, View } from 'react-native';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
-
 
 export const AuthNavigator = () => {
 
