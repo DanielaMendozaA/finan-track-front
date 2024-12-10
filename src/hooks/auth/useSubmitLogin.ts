@@ -3,12 +3,18 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { AuthService } from "../../services/auth/auth.service";
 import { ILoginUser } from "../../services/auth/interfaces/login-user.interface";
+import { useAuth } from "../../context/auth.context";
+import { AppDispatch } from "../../redux/store";
+import { useDispatch } from "react-redux";
+import { saveToken } from "../../redux/features/userThunks";
 
 
 const useSubmitLogin = () => {
     const [loading, setLoading] = useState(false);
     const [errorText, setErrorText] = useState<string>('');
-    const [openModalError, setOpenModalError] = useState(false)
+    const [openModalError, setOpenModalError] = useState(false);
+    const dispatch: AppDispatch = useDispatch<AppDispatch>();
+    const { signIn } = useAuth();
 
 
     const submitLogin = async (data: ILoginUser, onSuccess: () => void) => {
@@ -17,9 +23,11 @@ const useSubmitLogin = () => {
         try {
             const loginUser = await AuthService.login(data);
             console.log("este es login user", loginUser );
-
+            dispatch(saveToken(loginUser.data.token));
             await AsyncStorage.setItem('user', JSON.stringify(loginUser.data.user))
             await AsyncStorage.setItem('token', JSON.stringify(loginUser.data.token))
+
+            signIn(loginUser.data.token);
             
             onSuccess(); 
         } catch (err: any) {

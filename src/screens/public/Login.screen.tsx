@@ -28,7 +28,6 @@ const LoginScreen = () => {
 
     const handleSubmit = async (formData: ILoginUser) => {
         await submitLogin(formData, () => {
-            navigationHome.navigate('Home')
             ToastAndroid.show('¡Bienvenido!', ToastAndroid.SHORT);
 
         });

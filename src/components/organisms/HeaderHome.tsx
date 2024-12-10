@@ -24,22 +24,6 @@ const HeaderHome: React.FC<IHeaderHomeProp> = ({activeSection, setActiveSection 
     const styles = createStyles(theme)
     return (
         <View style={styles.containerHeader}>
-            
-            <View style={styles.containerHeaderHome}>
-                <Text style={styles.textHome}>HOME</Text>
-                <CustomButton
-                    title=""
-                    onPress={() => {
-                        console.log('frecuentes');
-                    }}
-                    iconName="menu"
-                    size={55}
-                    color={theme.colors.text}
-                    style={styles.menuButton}
-
-                />
-            </View>
-
             <View style={styles.containerButtons}>
                 <CustomButton
                     title="Frecuentes"
@@ -60,18 +44,20 @@ const HeaderHome: React.FC<IHeaderHomeProp> = ({activeSection, setActiveSection 
     )
 }
 
-export default HeaderHome
+export default HeaderHome;
 
 const { width, height } = Dimensions.get('window');
 
 const createStyles = (theme: Theme) =>
     StyleSheet.create({
 
-        containerHeader: {
-            width: '100%',
-            backgroundColor: theme.colors.card,
-            height: '25%'
-          },
+      containerHeader: {
+        width: '100%',
+        backgroundColor: theme.colors.card,
+        height: '15%',
+        justifyContent: 'flex-end',  
+        paddingBottom: 5,  
+      },
           containerHeaderHome: {
             width: '100%',
             flexDirection: 'row',
@@ -79,27 +65,20 @@ const createStyles = (theme: Theme) =>
             alignItems: 'center',
             padding: 15,
           },
-          textHome: {
-            color: theme.colors.text,
-            fontSize: 35,
-            marginLeft: 30,
+          containerButtons: {
+            flexDirection: 'row',
+            alignItems: 'center',
+
           },
           budgetTypeButton: {
             backgroundColor: theme.colors.card,
-            width: width * 0.5,
-            padding: 0
+            width: width * 0.5,  
+            paddingVertical: 10, 
           },
           budgetTypeButtonText: {
             color: theme.colors.text,
-            fontSize: 20
-          },
-          containerButtons: {
-            width: '100%',
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-            alignItems: 'center',
-            marginTop: 40
-      
+            fontSize: 20,
+            fontWeight: '400'
           },
           menuButton: {
             padding: 0,

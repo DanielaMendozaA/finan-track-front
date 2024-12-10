@@ -1,9 +1,9 @@
-export const BUDGET_API_ENDPOINTS = (id?: number) => {
+export const BUDGET_API_ENDPOINTS = (id?: number | string) => {
     const resource = 'budgets/';
     return {
         CREATE: `${resource}`,
-        GET_FREQUENCY: `${resource}frequency`,
-        GET_OCCASIONAL: `${resource}occasional`,
+        GET_FREQUENCY: `${resource}frequency?userId=${id}`,
+        GET_OCCASIONAL: `${resource}occasional?userId=${id}`,
         DELETE:  `${resource}:${id}`,
     }
 }

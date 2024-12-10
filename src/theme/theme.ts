@@ -7,12 +7,12 @@ const WEB_FONT_STACK =
 export const lightTheme: Theme = {
     dark: false,
     colors: {
-        background: '#F0F0F0',
-        text: '#919bba',
-        primary: '#F45050',
-        card: '#3C486B',
-        border: '#ffffff',
-        notification: '#6200ee',
+        background: '#F8EDE3',
+        text: '#09080e',
+        primary: '#d18b77',
+        card: '#be9bef',
+        border: '#FCD190',
+        notification: '#c9b2ea',
     },
     fonts: Platform.select({
         web: {
@@ -78,7 +78,7 @@ export const darkTheme: Theme = {
         background: '#1D1738',
         text: '#F8EDE3',
         primary: '#d18b77',
-        card: '#2D2552',
+        card: '#3a304f',
         notification: '#c9b2ea',
         border: '#FCD190',
     },
