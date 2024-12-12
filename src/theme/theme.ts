@@ -9,9 +9,9 @@ export const lightTheme: Theme = {
     colors: {
         background: '#F8EDE3',
         text: '#09080e',
-        primary: '#5d5545',
-        card: '#be9bef',
-        border: '#FCD190',
+        primary: '#b95bde',
+        card: '#bd99e3',
+        border: '#8616a2',
         notification: '#c9b2ea',
     },
     fonts: Platform.select({
@@ -78,7 +78,7 @@ export const darkTheme: Theme = {
         background: '#1D1738',
         text: '#F8EDE3',
         primary: '#d18b77',
-        card: '#3a304f',
+        card: '#373046',
         notification: '#c9b2ea',
         border: '#FCD190',
     },

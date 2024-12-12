@@ -4,7 +4,7 @@ import { ActivityIndicator, Alert, Image, StyleSheet, ToastAndroid, View } from 
 import { Theme, useNavigation, useRoute, useTheme } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-import { HomeNavigationProp, LoginNavigationProp, LoginScreenRoutenProp, RegisterNavigationProp } from '../../navigation/types/types';
+import { DrawerHomeNavigationProp, LoginNavigationProp, LoginScreenRoutenProp, RegisterNavigationProp } from '../../navigation/types/types';
 import ReusableForm from '../../components/molecules/ReusableForm';
 import useSubmitLogin from '../../hooks/auth/useSubmitLogin';
 import { ILoginUser } from '../../services/auth/interfaces/login-user.interface';
@@ -13,7 +13,7 @@ import { CustomModalConfirmComponent } from '../../components/molecules/CustomMo
 const LoginScreen = () => {
     const navigationLogin = useNavigation<LoginNavigationProp>();
     const navigation = useNavigation<RegisterNavigationProp>();
-    const navigationHome = useNavigation<HomeNavigationProp>();
+    const navigationHome = useNavigation<DrawerHomeNavigationProp>();
     const { params } = useRoute<LoginScreenRoutenProp>();
     const { email = '', password = '' } = params || {};
     const defaultValues = {

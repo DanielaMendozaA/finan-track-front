@@ -55,7 +55,7 @@ const BudgetPieChart = ({ initialBudget, currentBudget, title }: IBudgetPieChart
                     onPress={() => { }}
                     iconName='more-horiz'
                     size={35}
-                    color={theme.colors.text}
+                    color='#F8EDE3'
                     style={styles.customButtons}
 
                 />
@@ -190,9 +190,9 @@ const createStyles = (theme: Theme) =>
             gap: 20
         },
         customButtons: {
-            backgroundColor: theme.colors.card,
             padding: 0,
             width: 'auto',
+            backgroundColor: 'transparent'
         },
         containerButtons: {
             justifyContent: 'space-between',

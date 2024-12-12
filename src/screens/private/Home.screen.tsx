@@ -5,6 +5,7 @@ import CustomButton from "../../components/atoms/CustomTouchableButton";
 import { Theme, useTheme } from "@react-navigation/native";
 import HeaderHome from "../../components/organisms/HeaderHome";
 import { FrequencyList } from "../../components/organisms/FrequencyList";
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const HomeScreen = () => {
   const [activeSection, setActiveSection] = useState<'Frecuentes' | 'Ocasionales'>('Frecuentes');
@@ -16,7 +17,6 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <HeaderHome
-      activeSection={activeSection}
       setActiveSection={setActiveSection}
       />
 
@@ -33,10 +33,11 @@ const HomeScreen = () => {
             onPress={() => {
               console.log('frecuentes');
             }}
-            iconName="add"
-            size={55}
-            color='#F8EDE3'
+            iconName="add-box"
+            size={60}
+            color={theme.colors.text}
             style={styles.floatingButton}
+            IconComponent={MaterialIcons}
 
           />
 
@@ -72,7 +73,7 @@ const createStyles = (theme: Theme) =>
       marginLeft: -30, 
       width: 60,  
       height: 60,
-      backgroundColor: '#ea9191',
+      backgroundColor: 'transparent',
       borderRadius: 30, 
       justifyContent: 'center',
       alignItems: 'center',

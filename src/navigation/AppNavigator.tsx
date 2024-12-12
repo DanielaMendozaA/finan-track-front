@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Appearance, ColorSchemeName } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
+import {  useSelector } from 'react-redux';
 
+import { DrawerNavigator } from "./DrawerNavigator";
 import { ThemeContext } from "../theme/theme.context";
 import { darkTheme, lightTheme } from "../theme/theme";
-import { DrawerNavigator } from "./DrawerNavigator";
 import { AuthNavigator } from "./AuthNavigator";
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../redux/store';
+import {  RootState } from '../redux/store';
 
 
 

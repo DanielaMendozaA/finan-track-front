@@ -2,9 +2,10 @@ import React, { useContext, useEffect, useState } from 'react'
 import { View, StyleSheet, Dimensions } from "react-native";
 import { Theme, useNavigation, useTheme } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import SettingsScreen from '../screens/private/Settings.screen';
-import { HomeNavigationProp, SettingsNavigationProp } from './types/types';
+import { DrawerHomeNavigationProp, DrawerSettingsNavigationProp } from './types/types';
 import HomeScreen from '../screens/private/Home.screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomButton from '../components/atoms/CustomTouchableButton';
@@ -14,9 +15,11 @@ import { removeToken } from '../redux/features/userThunks';
 import { ThemeContext } from '../theme/theme.context';
 
 
+
+
 const CustomDrawerContent = () => {
-    const navigationHome = useNavigation<HomeNavigationProp>();
-    const navigationSettings = useNavigation<SettingsNavigationProp>();
+    const navigationHome = useNavigation<DrawerHomeNavigationProp>();
+    const navigationSettings = useNavigation<DrawerSettingsNavigationProp>();
     const dispatch: AppDispatch = useDispatch<AppDispatch>();
     const { themeType, toggleTheme } = useContext(ThemeContext)
     const [themeButtonText, setThemeButtonText] = useState({
@@ -63,6 +66,7 @@ const CustomDrawerContent = () => {
                 onPress={() => navigationHome.navigate('Home')}
                 iconName='home-filled'
                 color={theme.colors.text}
+                IconComponent={MaterialIcons}
                 size={30}
                 style={styles.drawerButton}
                 textStyle={styles.drawerButtonText}
@@ -71,6 +75,7 @@ const CustomDrawerContent = () => {
                 title="Estadísticas"
                 onPress={() => navigationSettings.navigate('Settings')}
                 iconName='auto-graph'
+                IconComponent={MaterialIcons}
                 color={theme.colors.text}
                 size={30}
                 style={styles.drawerButton}
@@ -82,6 +87,7 @@ const CustomDrawerContent = () => {
                 onPress={handleToggle}
                 iconName={themeButtonText.iconName}
                 color={theme.colors.text}
+                IconComponent={MaterialIcons}
                 size={30}
                 style={styles.drawerButton}
                 textStyle={styles.drawerButtonText}
@@ -91,6 +97,7 @@ const CustomDrawerContent = () => {
                 onPress={logout}
                 iconName='logout'
                 color={theme.colors.text}
+                IconComponent={MaterialIcons}
                 size={30}
                 style={styles.drawerButton}
                 textStyle={styles.drawerButtonText}
@@ -115,6 +122,7 @@ export const DrawerNavigator = () => {
                     alignItems: 'flex-start'
 
                 },
+                headerShown: false,
 
 
             }}

@@ -30,7 +30,7 @@ export const CustomInput: React.FC<CustomInputProps> = ({
             value={value}
             onChangeText={onChange}
             placeholder={placeholder}
-            placeholderTextColor={theme.colors.background}
+            placeholderTextColor={theme.colors.text}
             keyboardType={keyboardType}
             secureTextEntry={secureTextEntry}
             style={[styles.input, style]}
@@ -44,7 +44,9 @@ const { width, height } = Dimensions.get('window');
 const createStyles = (theme: Theme) =>
     StyleSheet.create({
         input: {
-            backgroundColor: theme.colors.notification
+            backgroundColor: theme.colors.card,
+            color:  theme.colors.text,
+            padding: 15
         }
 
 
