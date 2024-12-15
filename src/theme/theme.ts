@@ -9,10 +9,10 @@ export const lightTheme: Theme = {
     colors: {
         background: '#F8EDE3',
         text: '#09080e',
-        primary: '#b95bde',
-        card: '#bd99e3',
-        border: '#8616a2',
-        notification: '#c9b2ea',
+        primary: '#583dd4',
+        card: '#527a75',
+        border: '#305774',
+        notification: '#87449e',
     },
     fonts: Platform.select({
         web: {
@@ -75,11 +75,11 @@ export const lightTheme: Theme = {
 export const darkTheme: Theme = {
     dark: true,
     colors: {
-        background: '#1D1738',
+        background: '#130f25',
         text: '#F8EDE3',
         primary: '#d18b77',
-        card: '#373046',
-        notification: '#c9b2ea',
+        card: '#3a3548',
+        notification: '#b5e3d9',
         border: '#FCD190',
     },
     fonts: Platform.select({

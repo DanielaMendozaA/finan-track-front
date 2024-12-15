@@ -1,14 +1,36 @@
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { Dimensions, StyleSheet, View } from "react-native";
 import { useState } from "react";
+import MaterialComminityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import CustomButton from "../../components/atoms/CustomTouchableButton";
 import { Theme, useTheme } from "@react-navigation/native";
 import HeaderHome from "../../components/organisms/HeaderHome";
-import { FrequencyList } from "../../components/organisms/FrequencyList";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { CustomInput } from "../../components/atoms/CustomInput";
+import FrequencyBudget from "../../components/atoms/FrequencyBudgetList";
+import OccassionalBudget from "../../components/atoms/OccassionalBudget";
+import AddBudgetForm from "../../components/organisms/AddBudgetForm";
 
 const HomeScreen = () => {
-  const [activeSection, setActiveSection] = useState<'Frecuentes' | 'Ocasionales'>('Frecuentes');
+  const [activeSection, setActiveSection] = useState<'frequency' | 'occasional'>('frequency');
+  const [title, setTitle] = useState('');
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+
+  const openModal = () => {
+    setIsModalVisible(true)
+  }
+
+  const closeModal = () => {
+    setIsModalVisible(false)
+  }
+
+
+  const handleInputChange = (text: string) => {
+
+    console.log('este es el text', text);
+    setTitle(text)
+
+  }
 
 
   const theme = useTheme()
@@ -17,30 +39,56 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <HeaderHome
-      setActiveSection={setActiveSection}
+        setActiveSection={setActiveSection}
+        activeSection={activeSection}
       />
 
+
+      <View style={styles.containerFilters}>
+        <CustomButton
+          onPress={() => { }}
+          iconName="tune-variant"
+          size={30}
+          IconComponent={MaterialComminityIcons}
+          style={styles.budgetTypeButton}
+          textStyle={styles.budgetTypeButtonText}
+          color={theme.colors.text}
+        />
+
+        <CustomInput
+          style={styles.customInput}
+          value={title}
+          onChange={handleInputChange}
+          placeholder='Filtrar por Titulo'
+        />
+      </View>
+
       <View style={styles.contentContainer}>
-        {activeSection === 'Frecuentes' ? (
-          <FrequencyList/>
+        {activeSection === 'frequency' ? (
+          <FrequencyBudget />
         ) : (
-          <Text style={styles.textHome}></Text>
+          <OccassionalBudget />
         )}
       </View>
-      
+
+
       <CustomButton
-            title=""
-            onPress={() => {
-              console.log('frecuentes');
-            }}
-            iconName="add-box"
-            size={60}
-            color={theme.colors.text}
-            style={styles.floatingButton}
-            IconComponent={MaterialIcons}
+        title=""
+        onPress={openModal}
+        iconName="add-box"
+        size={60}
+        color={theme.colors.text}
+        style={styles.floatingButton}
+        IconComponent={MaterialIcons}
 
-          />
+      />
 
+
+      <AddBudgetForm
+        visible={isModalVisible}
+        onClose={closeModal}
+
+      />
 
     </View>
   );
@@ -54,6 +102,7 @@ const createStyles = (theme: Theme) =>
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
+      gap: 20
     },
     contentContainer: {
       flex: 1,
@@ -67,16 +116,36 @@ const createStyles = (theme: Theme) =>
 
     floatingButton: {
       position: 'absolute',
-      padding: 0, 
-      bottom: 20, 
-      left: '50%', 
-      marginLeft: -30, 
-      width: 60,  
+      padding: 0,
+      bottom: 20,
+      left: '50%',
+      marginLeft: -30,
+      width: 60,
       height: 60,
       backgroundColor: 'transparent',
-      borderRadius: 30, 
+      borderRadius: 30,
       justifyContent: 'center',
       alignItems: 'center',
-    }
+    },
+    containerFilters: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: 10
+    },
+    budgetTypeButton: {
+      backgroundColor: theme.colors.card,
+      paddingVertical: 10,
+      padding: 0,
+      width: '20%'
+    },
+    budgetTypeButtonText: {
+      color: theme.colors.text,
+      fontSize: 20,
+      fontWeight: '400'
+    },
+    customInput: {
+      width: width * 0.7,
+      borderRadius: 10
+    },
   });
 

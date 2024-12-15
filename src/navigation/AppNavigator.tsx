@@ -14,7 +14,6 @@ import {  RootState } from '../redux/store';
 const AppNavigator = () => {
     const colorScheme = Appearance.getColorScheme();
     const [theme, setTheme] = useState<ColorSchemeName>(colorScheme);
-    // const { isAuthenticated } = useAuth();
     const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
 
 

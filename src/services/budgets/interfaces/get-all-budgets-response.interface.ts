@@ -10,9 +10,10 @@ export interface IBudget {
     baseAmount:    string;
     currentAmount: string;
     type:          Type;
-    frequency:     Frequency;
-    startDate:     Date;
-    endDate:       Date;
+    currency: Currency;
+    frequency?:     Frequency;
+    startDate?:     Date;
+    endDate?:       Date;
 }
 
 export enum Frequency {
@@ -24,4 +25,9 @@ export enum Frequency {
 export enum Type {
     Frequency = "frequency",
     occasional = 'occasional'
+}
+
+export enum Currency {
+    COP = 'COP',
+    USD = 'USD'
 }

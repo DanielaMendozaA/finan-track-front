@@ -1,13 +1,20 @@
-import React from "react";
-import { Controller, useForm } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { Control, Controller, FieldErrors, FieldValues, Path, useForm } from "react-hook-form";
+import { Theme, useTheme } from "@react-navigation/native";
 import { View, Text, TextInput, Switch, StyleSheet, TouchableOpacity } from "react-native";
 import { Picker } from '@react-native-picker/picker';
-import { Theme, useTheme } from "@react-navigation/native";
+import DateTimePicker from '@react-native-community/datetimepicker';
+
 import { Dimensions } from 'react-native';
 import CustomButton from "../atoms/CustomTouchableButton";
 
-interface IInput {
-    name: string;
+export enum KeyboardTypeEnum {
+    NUMERIC = 'numeric',
+    EMAIL = 'email-address'
+}
+
+export interface IInput<T extends FieldValues> {
+    name: Path<T>;
     label?: string;
     type: string;
     placeholder?: string;
@@ -15,24 +22,31 @@ interface IInput {
     rules?: object;
     iconName?: string;
     iconLibrary?: any;
-}
-
-interface IFormProps {
-    inputs: IInput[];
-    onSubmit: (data: any) => void;
-    buttonText: string;
-    navLink?: { path: string; text: string; onPress: () => void };
-    defaultValues?: any;
+    keyboardType?: KeyboardTypeEnum | "default";
     style?: object;
+    inputGroup?: boolean;
+    processed?: boolean;
+    disabled?: boolean;
+    control: Control<T>;
+    errors?: FieldErrors<T>;
 }
 
-const ReusableForm = ({ inputs, onSubmit, buttonText, navLink, defaultValues, style  }: IFormProps) => {
-    const { control, handleSubmit, formState: { errors } } = useForm({
-        defaultValues
-    });
-    const theme = useTheme()
-    const fontStyles = theme.fonts.heavy;
-    const styles = createStyles(theme)
+
+interface IFormProps<T extends FieldValues> {
+    inputs: IInput<T>[];
+    style?: object;
+    // navLink?: { path: string; text: string; onPress: () => void };
+    // buttonText?: string
+}   
+
+
+const ReusableForm = <T extends FieldValues>({ inputs, style }: IFormProps<T>) => {
+
+
+
+    const [showPicker, setShowPicker] = useState(false);
+    const theme = useTheme();
+    const styles = createStyles(theme);
 
     const getErrorMessage = (error: any): string | null => {
         if (!error) return null;
@@ -40,23 +54,28 @@ const ReusableForm = ({ inputs, onSubmit, buttonText, navLink, defaultValues, st
         if (error.type === "pattern" && typeof error.message === "string") return error.message;
         return null;
     };
+    const handleShowPicker = () => setShowPicker(true);
 
 
     return (
         <View style={styles.form}>
             {inputs.map((input, index) => (
+
+
+
                 <View key={index} style={[styles.form, style]}>
-                    <Text style={styles.label}>{input.label}</Text>
 
                     <Controller
-                        control={control}
+                        control={input.control}
                         name={input.name}
                         rules={input.rules}
                         render={({ field: { onChange, onBlur, value } }) => {
+                            const keyboardType = input.keyboardType || "default";
+
                             switch (input.type) {
                                 case "text":
                                     return (
-                                        <View style={styles.containerIcon}>
+                                        <View style={[styles.containerIcon, input.style]}>
                                             {input.iconName && input.iconLibrary && (
                                                 <input.iconLibrary
                                                     name={input.iconName}
@@ -72,22 +91,31 @@ const ReusableForm = ({ inputs, onSubmit, buttonText, navLink, defaultValues, st
                                                 onBlur={onBlur}
                                                 onChangeText={onChange}
                                                 value={value}
+                                                keyboardType={keyboardType}
+
                                             />
                                         </View>
                                     );
 
                                 case "textarea":
                                     return (
-                                        <TextInput
-                                            style={[styles.input, styles.textarea]}
-                                            placeholder={input.placeholder}
-                                            placeholderTextColor={theme.colors.text}
-                                            onBlur={onBlur}
-                                            onChangeText={onChange}
-                                            value={value}
-                                            multiline
-                                            numberOfLines={4}
-                                        />
+                                        <>
+                                            {input.label &&
+                                                <Text style={styles.label}>{input.label}</Text>
+
+                                            }
+
+                                            <TextInput
+                                                style={[styles.input, styles.textarea, input.style]}
+                                                placeholder={input.placeholder}
+                                                placeholderTextColor={theme.colors.text}
+                                                onBlur={onBlur}
+                                                onChangeText={onChange}
+                                                value={value}
+                                                multiline
+                                                numberOfLines={4}
+                                            />
+                                        </>
                                     );
 
                                 case "checkbox":
@@ -95,20 +123,30 @@ const ReusableForm = ({ inputs, onSubmit, buttonText, navLink, defaultValues, st
                                         <Switch
                                             value={value || false}
                                             onValueChange={onChange}
+                                            style={input.style}
                                         />
                                     );
-
                                 case "select":
                                     return (
-                                        <Picker
-                                            selectedValue={value}
-                                            onValueChange={onChange}
-                                            style={styles.picker}
-                                        >
-                                            {input.options?.map((option, idx) => (
-                                                <Picker.Item key={idx} label={option.label} value={option.value} />
-                                            ))}
-                                        </Picker>
+                                        <View style={[styles.containerPicker, input.style]}>
+                                            {input.label && (
+                                                <Text style={styles.label}>{input.label}</Text>
+                                            )}
+                                            <Picker
+                                                selectedValue={value}
+                                                onValueChange={onChange}
+                                                style={styles.picker}
+                                                itemStyle={styles.pickerItem}
+                                            >
+                                                {input.options?.map((option, idx) => (
+                                                    <Picker.Item
+                                                        key={idx}
+                                                        label={option.label}
+                                                        value={option.value}
+                                                    />
+                                                ))}
+                                            </Picker>
+                                        </View>
                                     );
 
                                 case "password":
@@ -123,7 +161,7 @@ const ReusableForm = ({ inputs, onSubmit, buttonText, navLink, defaultValues, st
                                                 />
                                             )}
                                             <TextInput
-                                                style={[styles.input]}
+                                                style={[styles.input, input.style]}
                                                 placeholder={input.placeholder}
                                                 placeholderTextColor={theme.colors.text}
                                                 onBlur={onBlur}
@@ -136,55 +174,90 @@ const ReusableForm = ({ inputs, onSubmit, buttonText, navLink, defaultValues, st
 
                                 case "radio":
                                     return (
-                                        <View>
-                                            {input.options?.map((option, idx) => (
-                                                <View key={idx} style={styles.radioOption}>
-                                                    <TouchableOpacity
-                                                        style={styles.radioButton}
-                                                        onPress={() => onChange(option.value)}
-                                                    >
-                                                        {value === option.value && (
-                                                            <View style={styles.radioInnerCircle} />
-                                                        )}
-                                                    </TouchableOpacity>
-                                                    <Text style={styles.radioLabel}>{option.label}</Text>
-                                                </View>
-                                            ))}
+                                        <View style={[styles.containerRadio, input.style]}>
+                                            {input.label && <Text style={styles.label}>{input.label}</Text>}
+                                            <View style={styles.radioGroup}>
+                                                {input.options?.map((option, idx) => (
+                                                    <View key={idx} style={styles.radioOption}>
+                                                        <TouchableOpacity
+                                                            style={styles.radioButton}
+                                                            onPress={() => {
+                                                                onChange(option.value);
+                                                                // console.log("Seleccionado:", option.value); 
+                                                            }}
+                                                        >
+                                                            {value === option.value && (
+                                                                <View style={styles.radioInnerCircle} />
+                                                            )}
+                                                        </TouchableOpacity>
+                                                        <Text style={styles.radioLabel}>{option.label}</Text>
+                                                    </View>
+                                                ))}
+                                            </View>
                                         </View>
                                     );
 
+                                case "date":
+                                    return (
+                                        <View style={styles.containerDatePicker}>
+                                            {input.label && (
+                                                <Text style={styles.dataPickerLabel}>{input.label} :</Text>
+                                            )}
 
+                                            <CustomButton
+                                                title={
+                                                    !isNaN(value.getTime())
+                                                        ? value.toISOString().split('T')[0]
+                                                        : new Date().toISOString().split('T')[0]
+                                                }
+                                                onPress={handleShowPicker}
+                                                iconName={input.disabled ? undefined : "arrow-drop-down"}
+                                                size={25}
+                                                color={theme.colors.notification}
+                                                IconComponent={input.iconLibrary}
+                                                iconRight={true}
+                                                style={styles.buttonDataPicker}
+                                                textStyle={styles.buttonDataPickeText}
+                                                disabled={input.disabled}
+                                            />
+
+                                            {showPicker && (
+                                                <DateTimePicker
+                                                    value={value || new Date()}
+                                                    mode="date"
+                                                    display="spinner"
+                                                    onChange={(event, date) => {
+                                                        setShowPicker(false);
+                                                        if (date) {
+                                                            onChange(date);
+                                                        }
+                                                    }}
+                                                />
+                                            )}
+                                        </View>
+                                    );
                                 default:
                                     return <Text style={{ color: "red" }}>Tipo de campo no soportado</Text>;
                             }
                         }}
                     />
-                    {errors[input.name] && (
-                        <Text style={styles.error}>
-                            {getErrorMessage(errors[input.name])}
-                        </Text>
+
+                    {input.errors && input.errors[input.name] && input.errors[input.name]?.message && (
+                        <Text
+                        style={{color: theme.colors.primary}}
+                        
+                        >{String(input.errors[input.name]?.message)}</Text>
                     )}
                 </View>
             ))}
-
-
+            {/* {navLink && (
                 <CustomButton
-                    title={buttonText}
-                    onPress={handleSubmit(onSubmit)}
-                    style={styles.buttonSend}
-
+                    title={navLink.text}
+                    onPress={navLink.onPress}
+                    style={styles.navLink}
+                    textStyle={styles.textButton}
                 />
-
-                {navLink && (
-
-                    <CustomButton
-                        title={navLink.text}
-                        onPress={navLink.onPress}
-                        style={styles.navLink}
-                        textStyle={styles.textButton}
-
-                    />
-                )}
+            )}  */}
         </View>
     );
 };
@@ -192,20 +265,45 @@ const ReusableForm = ({ inputs, onSubmit, buttonText, navLink, defaultValues, st
 export default ReusableForm;
 
 const { width, height } = Dimensions.get('window');
+
 const createStyles = (theme: Theme) =>
     StyleSheet.create({
         form: {
-            // padding: 10,
-            // gap: 10,
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: '5%',
+
+        },
+        radioGroup: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: 15
+        },
+        containerPicker: {
+            width: width * 0.3,
+            borderRadius: 10,
             justifyContent: "center",
-            alignItems: "center"
+            borderWidth: 1,
+            borderColor: theme.colors.card,
+            height: height * 0.1,
         },
         label: {
             marginBottom: 5,
-            color: theme.colors.text
+            color: theme.colors.text,
+            textAlign: 'center',
+            fontSize: 20,
         },
-        buttonSend:{
-            marginTop: 35
+        buttonSend: {
+            alignSelf: "center"
+        },
+        picker: {
+            color: theme.colors.text,
+        },
+        pickerItem: {
+            color: theme.colors.text,
+            fontSize: 10,
         },
         containerIcon: {
             flexDirection: "row",
@@ -214,72 +312,83 @@ const createStyles = (theme: Theme) =>
             borderColor: theme.colors.border,
             borderRadius: 10,
             paddingHorizontal: 10,
-            // marginBottom: 10,
             width: width * 0.88,
-            height: height * 0.1
+            height: height * 0.1,
         },
         inputIcon: {
             marginRight: 10,
         },
         input: {
-            // paddingVertical: 10,
             color: theme.colors.text,
         },
         textarea: {
             height: 100,
             textAlignVertical: "top",
         },
-        picker: {
-            height: 50,
-            borderWidth: 1,
-            borderColor: theme.colors.text,
-            borderRadius: 5,
-            color: theme.colors.text,
-        },
         error: {
             color: theme.colors.primary,
             fontSize: 12,
             padding: 10
         },
-        navLink: {
-            alignSelf: "center",
-            backgroundColor: theme.colors.background,
-        },
-        textButton: {
-            color: theme.colors.text,
-            fontSize: 20,
-        },
-        navLinkText: {
-            color: theme.colors.text,
-            fontSize: 20
-        },
         radioOption: {
             flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 10,
-            color: theme.colors.text,
+            marginBottom: 8,
+            width: width * 0.4,
+
         },
         radioButton: {
             height: 20,
             width: 20,
             borderRadius: 10,
             borderWidth: 2,
-            borderColor: theme.colors.primary,
-            alignItems: "center",
+            borderColor: theme.colors.card,
+            alignItems: "flex-end",
             justifyContent: "center",
             marginRight: 10,
+            alignSelf: "flex-end"
         },
         radioButtonSelected: {
             borderColor: theme.colors.card,
         },
         radioInnerCircle: {
-            height: 10,
-            width: 10,
+            height: height * 0.025,
+            width: width * 0.05,
             borderRadius: 5,
             backgroundColor: theme.colors.card,
         },
         radioLabel: {
             fontSize: 16,
-            color: theme.colors.text
+            color: theme.colors.text,
+            textAlign: 'center'
         },
+        containerRadio: {
+            gap: 10,
+        },
+        containerDatePicker: {
+            gap: 10
+        },
+        dateText: {
+            color: theme.colors.text,
+            fontSize: 16,
+        },
+        buttonDataPicker: {
+            backgroundColor: 'transparent',
+            padding: 15,
+            width: width * 0.4,
+            height: height * 0.1,
+            borderWidth: 1,
+            borderColor: theme.colors.card,
+            borderBlockEndColor: theme.colors.notification,
+        },
+        buttonDataPickeText: {
+            color: theme.colors.text,
+            fontWeight: '400',
+            fontSize: 14
+
+        },
+        dataPickerLabel: {
+            color: theme.colors.text,
+            textAlign: 'center',
+        }
     });
+

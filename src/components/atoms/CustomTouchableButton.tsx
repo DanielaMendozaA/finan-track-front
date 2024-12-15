@@ -12,21 +12,26 @@ interface CustomButtonProps {
     style?: object;
     textStyle?: object;
     IconComponent?: React.ComponentType<any>;
+    disabled?: boolean
+    iconRight?: boolean
 }
 
-const CustomButton: React.FC<CustomButtonProps> = ({ title, onPress, iconName, IconComponent, color, size, style, textStyle }) => {
+const CustomButton: React.FC<CustomButtonProps> = ({ title, onPress, iconName, IconComponent, color, size, style, textStyle, disabled, iconRight }) => {
 
     const theme = useTheme()
     const styles = createStyles(theme)
 
     return (
 
-        <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
-            {IconComponent && iconName && size && (
+        <TouchableOpacity style={[styles.button, style]} onPress={onPress} disabled={disabled || false}>
+            {IconComponent && iconName && size && !iconRight && (
                 <IconComponent name={iconName} size={size} color={color || theme.colors.primary} />
             )}
             {title &&
                 <Text style={[styles.buttonText, textStyle]}>{title}</Text>}
+            {IconComponent && iconName && size && iconRight && (
+                <IconComponent name={iconName} size={size} color={color || theme.colors.primary} />
+            )}
 
         </TouchableOpacity>
     );
@@ -52,6 +57,7 @@ const createStyles = (theme: Theme) =>
             color: theme.colors.background,
             fontSize: 16,
             fontWeight: 'bold',
+
         }
     });
 

@@ -20,4 +20,16 @@ export class BudgetService{
 
     }
 
+    static async getAllOccasional(userId: string) :  Promise<IGetAllBudgets>{
+        const endpoint = endpoints('GET_OCCASIONAL', userId);
+        try {
+            const response = await axiosInstanceBack.get<IGetAllBudgets>(endpoint);
+            return response.data
+            
+        } catch (error) {
+            console.error(error)
+            throw error;
+        }
+    }
+
 }

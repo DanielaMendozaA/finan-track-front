@@ -3,7 +3,7 @@ import { IBudget } from "../../services/budgets/interfaces/get-all-budgets-respo
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BudgetService } from "../../services/budgets/budget.service";
 
-export const useFetchGetBudgets = () => {
+export const useFetchGetBudgets = (type: 'occasional' | 'frequency') => {
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState<IBudget[]>([]);
     const [error, setError] = useState<string | null>(null);
@@ -23,8 +23,16 @@ export const useFetchGetBudgets = () => {
         setLoading(true);
 
         try {
-            const result = await BudgetService.getAllFrequency(userId);
-            console.log("este es el result de budgets",result );
+            let result
+            if(type === 'frequency'){
+                result = await BudgetService.getAllFrequency(userId);
+                console.log("el result desde frequency", result);
+                
+            }else{
+                result = await BudgetService.getAllOccasional(userId)
+                console.log("el result desde occasional", result);
+            }
+            
         
             setData(result.data);
         } catch (err: any) {

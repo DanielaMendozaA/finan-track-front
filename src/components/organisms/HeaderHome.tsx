@@ -1,85 +1,72 @@
 import { Theme, useNavigation, useTheme } from '@react-navigation/native'
 import React, { useState } from 'react'
-import { Dimensions, StyleSheet, Text, View } from 'react-native'
+import { Dimensions, StyleSheet, Text, View, Animated } from 'react-native'
 import CustomButton from '../atoms/CustomTouchableButton'
 import { DrawerNavigationPropType } from '../../navigation/types/types'
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 interface IHeaderHomeProp {
-
-  setActiveSection: React.Dispatch<React.SetStateAction<'Frecuentes' | 'Ocasionales'>>
-
+  setActiveSection: React.Dispatch<React.SetStateAction<'frequency' | 'occasional'>>;
+  activeSection: 'frequency' | 'occasional'; 
 }
 
-const HeaderHome: React.FC<IHeaderHomeProp> = ({ setActiveSection }) => {
+const HeaderHome: React.FC<IHeaderHomeProp> = ({ setActiveSection, activeSection }) => {
   const navigation = useNavigation<DrawerNavigationPropType>();
 
-
-
-  const handleButtonPress = (section: 'Frecuentes' | 'Ocasionales') => {
+  const handleButtonPress = (section: 'frequency' | 'occasional') => {
     setActiveSection(section);
   };
-
 
   const openDrawer = () => {
     navigation.openDrawer();
   };
+  
+  const theme = useTheme();
+  const styles = createStyles(theme, activeSection);
 
-
-  const theme = useTheme()
-  const styles = createStyles(theme)
   return (
     <View style={styles.containerHeader}>
-
-
       <View style={styles.containerHeaderTitle}>
-        <Text style={{ 
+        <Text style={{
           color: theme.colors.text,
           fontSize: 30,
           fontWeight: '300'
-          
-          }}>HOME</Text>
+        }}>HOME</Text>
         <CustomButton
           onPress={openDrawer}
           iconName="menufold"
           size={30}
           IconComponent={AntDesign}
-          style={styles.budgetTypeButton}
+          style={styles.menuButton}
           textStyle={styles.budgetTypeButtonText}
           color={theme.colors.text}
         />
       </View>
 
-
-
       <View style={styles.containerButtons}>
         <CustomButton
           title="Frecuentes"
-          onPress={() => handleButtonPress('Frecuentes')}
-          style={styles.budgetTypeButton}
+          onPress={() => handleButtonPress('frequency')}
+          style={activeSection === 'frequency' ? styles.selectedButton : styles.budgetTypeButton}
           textStyle={styles.budgetTypeButtonText}
-
         />
         <CustomButton
           title="Ocasionales"
-          onPress={() => handleButtonPress('Ocasionales')}
-          style={styles.budgetTypeButton}
+          onPress={() => handleButtonPress('occasional')}
+          style={activeSection === 'occasional' ? styles.selectedButton : styles.budgetTypeButton}
           textStyle={styles.budgetTypeButtonText}
         />
       </View>
-
     </View>
-  )
-}
+  );
+};
 
 export default HeaderHome;
 
 const { width, height } = Dimensions.get('window');
 
-const createStyles = (theme: Theme) =>
+const createStyles = (theme: Theme, activeSection: 'frequency' | 'occasional') =>
   StyleSheet.create({
-
     containerHeader: {
       width: '100%',
       backgroundColor: theme.colors.card,
@@ -99,18 +86,24 @@ const createStyles = (theme: Theme) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: 30
-
     },
     budgetTypeButton: {
       backgroundColor: theme.colors.card,
       width: 'auto',
       paddingVertical: 10,
-      padding: 0
+      padding: 0,
+    },
+    selectedButton: {
+      backgroundColor: 'transparent',
+      width: '45%',
+      borderBottomWidth: 5, 
+      borderBottomColor: theme.colors.text,
     },
     budgetTypeButtonText: {
       color: theme.colors.text,
       fontSize: 20,
-      fontWeight: '400'
+      fontWeight: '400',
+      textAlign: 'center',
     },
     menuButton: {
       padding: 0,
@@ -121,7 +114,7 @@ const createStyles = (theme: Theme) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'flex-end',
-      gap: 60,
+      gap: 40,
       width: width * 0.8,
     }
-  })
+  });

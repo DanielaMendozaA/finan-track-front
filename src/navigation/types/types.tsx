@@ -3,7 +3,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 
 export type RootStackParamList = {
-    Login: { email: string, password: string};
+    Login: { email?: string, password?: string};
     Register: undefined;
 }
 
