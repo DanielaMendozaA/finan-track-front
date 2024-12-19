@@ -1,33 +1,36 @@
-export interface IGetAllBudgets {
+export interface IGetBudgets {
     statusCode: number;
-    message:    string;
-    data:       IBudget[];
+    message: string;
+    data: IBudget[];
+}
+
+export interface IGetBudget {
+    statusCode: number;
+    message: string;
+    data: IBudget;
 }
 
 export interface IBudget {
-    id:            number;
-    title:         string;
-    baseAmount:    string;
+    id: number;
+    title: string;
+    baseAmount: string;
     currentAmount: string;
-    type:          Type;
+    type: Type;
     currency: Currency;
-    frequency?:     Frequency;
-    startDate?:     Date;
-    endDate?:       Date;
+    frequency?: Frequency;
+    startDate?: string;
+    endDate?: string;
+    categories?: ICategory[]; 
 }
 
-export enum Frequency {
-    Biweekly = "biweekly",
-    Montly = "montly",
-    Weekly = "weekly",
+export interface ICategory {
+    id: number;
+    name: string;
+    baseAmount: string;
+    currentAmount: string;
+    type: string;
 }
 
-export enum Type {
-    Frequency = "frequency",
-    occasional = 'occasional'
-}
-
-export enum Currency {
-    COP = 'COP',
-    USD = 'USD'
-}
+export type Type = 'frequency' | 'occasional';
+export type Currency = 'COP' | 'USD';
+export type Frequency = 'montly' | 'biweekly' | 'weekly' | 'once';

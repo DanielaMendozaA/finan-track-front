@@ -1,20 +1,26 @@
 import { Dimensions, StyleSheet, View } from "react-native";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import MaterialComminityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import CustomButton from "../../components/atoms/CustomTouchableButton";
-import { Theme, useTheme } from "@react-navigation/native";
+import { Theme, useFocusEffect, useRoute, useTheme } from "@react-navigation/native";
 import HeaderHome from "../../components/organisms/HeaderHome";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { CustomInput } from "../../components/atoms/CustomInput";
 import FrequencyBudget from "../../components/atoms/FrequencyBudgetList";
 import OccassionalBudget from "../../components/atoms/OccassionalBudget";
 import AddBudgetForm from "../../components/organisms/AddBudgetForm";
+import { useFetchGetBudgets } from "../../hooks/budgets/useFetchGetBudgets";
 
 const HomeScreen = () => {
   const [activeSection, setActiveSection] = useState<'frequency' | 'occasional'>('frequency');
   const [title, setTitle] = useState('');
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+  const [reload, setReload] = useState(false);
+
+  useEffect(() => {
+    setReload((prev) => !prev);
+  }, [])
 
   const openModal = () => {
     setIsModalVisible(true)
@@ -24,6 +30,9 @@ const HomeScreen = () => {
     setIsModalVisible(false)
   }
 
+  const handleReload = () => {
+    setReload((prev) => !prev);
+};
 
   const handleInputChange = (text: string) => {
 
@@ -31,6 +40,7 @@ const HomeScreen = () => {
     setTitle(text)
 
   }
+
 
 
   const theme = useTheme()
@@ -46,7 +56,7 @@ const HomeScreen = () => {
 
       <View style={styles.containerFilters}>
         <CustomButton
-          onPress={() => { }}
+          onPress={handleReload}
           iconName="tune-variant"
           size={30}
           IconComponent={MaterialComminityIcons}
@@ -65,7 +75,7 @@ const HomeScreen = () => {
 
       <View style={styles.contentContainer}>
         {activeSection === 'frequency' ? (
-          <FrequencyBudget />
+            <FrequencyBudget reload={reload} />
         ) : (
           <OccassionalBudget />
         )}
@@ -87,6 +97,7 @@ const HomeScreen = () => {
       <AddBudgetForm
         visible={isModalVisible}
         onClose={closeModal}
+        onSuccess={handleReload} 
 
       />
 

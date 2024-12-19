@@ -1,339 +1,153 @@
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Modal, StyleSheet, View } from 'react-native';
-import { Theme, useTheme } from '@react-navigation/native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ActivityIndicator, Dimensions, StyleSheet, View } from 'react-native';
+import { Theme, useNavigation, useTheme } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useForm, useWatch } from 'react-hook-form';
-import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import ReusableForm, { IInput, KeyboardTypeEnum } from '../molecules/ReusableForm';
 import CustomButton from '../atoms/CustomTouchableButton';
-import { subHours, addDays, startOfWeek } from 'date-fns';
+import { addBudgeschema } from '../../utilities/yupSchema/schemas';
+import ReusableModal from '../molecules/CustomModalContent';
+import { validateFrequency } from '../../utilities/funtions/validateFrequency';
+import ModalCategories from '../molecules/ModalCategories';
+import { useSubmitBudget } from '../../hooks/budgets/useSubmitBudgetCategories';
+import { categoryType } from '../../services/categories/interfaces/create-category-interface';
+import { CustomModalConfirmComponent } from '../molecules/CustomModal';
 
 interface IAddBudgetProps {
     visible: boolean;
     onClose: () => void;
+    onSuccess: () => void;
 }
 
-
-interface NewDates {
-    startDate: Date,
-    endDate: Date
-
+interface IAddCategories {
+    name: string;
+    type: categoryType;
+    baseAmount: number;
 }
-
-
-const schema = yup.object().shape({
-    title: yup
-        .string()
-        .min(2, "El título debe tener al menos 2 caracteres")
-        .required("El título es requerido"),
-
-    baseAmount: yup
-        .number()
-        .typeError("El saldo inicial debe ser un número válido")
-        .positive("El saldo inicial debe ser un número positivo")
-        .required("El saldo inicial es requerido"),
-
-    currency: yup
-        .string()
-        .oneOf(["COP", "USD"], "La moneda debe ser 'COP' o 'USD'")
-        .required("La moneda es requerida"),
-
-    Frequency: yup
-        .string()
-        .oneOf(
-            ["montly", "biweekly", "weekly", "once", ""],
-            "La frecuencia debe ser 'mensual', 'quincenal', 'semanal' o 'una vez'"
-        )
-        .required("La frecuencia es requerida"),
-
-    startDate: yup
-        .date()
-        .typeError("La fecha de inicio debe ser una fecha válida")
-        .nullable(),
-
-    endDate: yup
-        .date()
-        .typeError("La fecha de fin debe ser una fecha válida")
-        .min(
-            yup.ref("startDate"),
-            "La fecha de fin debe ser posterior a la fecha de inicio"
-        )
-        .nullable()
-});
 
 interface FormValues {
     title: string;
     baseAmount: number;
     currency: "COP" | "USD";
-    Frequency: "montly" | "biweekly" | "weekly" | "once" | "";
-    startDate?: Date | null | undefined; 
-    endDate?: Date | null | undefined;  
+    frequency: "montly" | "biweekly" | "weekly" | "once" | "";
+    startDate?: Date | null | undefined;
+    endDate?: Date | null | undefined;
 }
 
-// const AddBudgetForm: React.FC<IAddBudgetProps> = ({ visible, onClose }) => {
-//     const [buttonDisabled, setButtonDisabled] = useState(false)
-//     const { control, watch, setValue, handleSubmit, formState: { errors }  } = useForm<FormValues>({ defaultValues: { title: '', baseAmount: '', currency: 'COP', Frequency: '', startDate: {}, endDate: {} }, });
-
-
-//     const theme = useTheme();
-//     const styles = createStyles(theme);
-
-//     const handleSubmitForm = (data: FormValues) => { console.log("-------------datos-----------------", data); };
-
-
-//     // const watchedValues = useWatch({ control });
-//     // useEffect(() => {
-//     //     console.log("datos actualizados", watchedValues);
-//     //     setValues(watchedValues)
-
-
-//     // }, [watchedValues])
-
-//     // const frequency = watch('Frequency');
-
-//     // const validateFrequency = () => {
-//     //     const currentDate = subHours(new Date, 5)
-
-//     //     let newDates: NewDates = {
-//     //         startDate: new Date(),
-//     //         endDate: new Date()
-//     //     }
-//     //     switch (frequency) {
-//     //         case 'montly':
-//     //             newDates.startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-//     //             console.log("Esta es la fecha de inicio", newDates.startDate);
-
-//     //             newDates.endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-//     //             console.log("Esta es la fecha de fin", newDates.endDate);
-//     //             break;
-
-//     //         case 'biweekly':
-//     //             const dayOfMonth = currentDate.getDate()
-//     //             console.log("Este es el dia del mes", dayOfMonth);
-//     //             if (dayOfMonth >= 15) {
-//     //                 newDates.startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 16);
-//     //                 console.log("Esta es la fecha de inicio", newDates.startDate);
-//     //                 newDates.endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-//     //                 console.log("Esta es la fecha de fin", newDates.endDate);
-//     //             } else {
-//     //                 newDates.startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-//     //                 console.log("Esta es la fecha de inicio", newDates.startDate);
-//     //                 newDates.endDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 15);
-//     //                 console.log("Esta es la fecha de fin", newDates.endDate);
-//     //             }
-//     //             break;
-
-//     //         case 'weekly':
-//     //             newDates.startDate = startOfWeek(currentDate, { weekStartsOn: 1 })
-//     //             console.log("Esta es la fecha de inicio", newDates.startDate);
-//     //             newDates.endDate = addDays(newDates.startDate, 6);
-//     //             console.log("Esta es la fecha de fin", newDates.endDate);
-//     //             break;
-//     //     }
-
-//     //     setValue('startDate', newDates.startDate);
-//     //     setValue('endDate', newDates.endDate);
-//     //     setButtonDisabled(true)
-
-//     //     if (frequency === 'once') {
-//     //         setButtonDisabled(false)
-//     //     }
-
-//     // }
-
-//     // useEffect(() => {
-//     //     console.log('este es frequency', frequency);
-//     //     validateFrequency()
-//     // }, [frequency]);
-
-
-//  const inputs: IInput<{ title: string; baseAmount: string, }>[] = [
-//         {
-//             name: 'title',
-//             type: 'text',
-//             placeholder: 'Título',
-//             rules: { required: true },
-//             style: [styles.input],
-//             control,
-//             errors
-//         },
-//         {
-//             name: 'baseAmount',
-//             type: 'text',
-//             placeholder: 'Monto inicial',
-//             rules: { required: true },
-//             keyboardType: KeyboardTypeEnum.NUMERIC,
-//             inputGroup: true,
-//             style: [styles.inputAmount, styles.input],
-//         },
-//         {
-//             name: 'currency',
-//             type: 'select',
-//             placeholder: 'Moneda',
-//             rules: { required: true },
-//             options: [
-//                 { label: 'COP', value: 'COP' },
-//                 { label: 'USD', value: 'USD' },
-//             ],
-//             style: [styles.input],
-//         },
-//         {
-//             name: 'startDate',
-//             label: 'Inicio',
-//             type: 'date',
-//             iconLibrary: MaterialIcons,
-//             disabled: buttonDisabled
-//         },
-//         {
-//             name: 'endDate',
-//             label: 'Fin',
-//             type: 'date',
-//             iconLibrary: MaterialIcons,
-//             disabled: buttonDisabled
-//         },
-//         {
-//             name: 'Frequency',
-//             label: 'Frecuencia',
-//             type: 'radio',
-//             options: [
-//                 { label: 'Mensual', value: 'montly' },
-//                 { label: 'Quincenal', value: 'biweekly' },
-//                 { label: 'Semanal', value: 'weekly' },
-//                 { label: 'Una Vez', value: 'once' },
-//             ],
-//         },
-
-//     ];
-
-//     return (
-//         <Modal
-//             transparent={true}
-//             animationType="slide"
-//             visible={visible}
-//             onRequestClose={onClose}
-//         >
-//             <ScrollView>
-//                 <View style={styles.modalContent}>
-//                     <CustomButton
-//                         title=""
-//                         onPress={onClose}
-//                         iconName="closesquare"
-//                         size={35}
-//                         IconComponent={AntDesign}
-//                         style={styles.closeButton}
-//                         color={theme.colors.text}
-//                     />
-//                     <View style={styles.form}>
-//                         {/* 
-//                         <ReusableForm
-//                             inputs={inputs}
-//                             onSubmit={handleSubmitForm}
-//                             buttonText="Enviar"
-
-//                         />
-//                         <CustomButton
-//                             title='enviar'
-//                             onPress={() => {}}
-//                             style={styles.buttonSend}
-//                         /> */}
-//                     </View>
-//                 </View>
-
-
-
-//             </ScrollView>
-//         </Modal>
-//     );
-// };
-const AddBudgetForm: React.FC<IAddBudgetProps> = ({ visible, onClose }) => {
+const AddBudgetForm: React.FC<IAddBudgetProps> = ({ visible, onClose, onSuccess }) => {
     const [buttonDisabled, setButtonDisabled] = useState(false);
-
-    const theme = useTheme();
-    const styles = createStyles(theme);
-
+    const [isModalVisible, setModalVisible] = useState(false)
+    const [categories, setCategories] = useState<IAddCategories[]>(
+        []
+    );
+    const [budgetType, setBudgetType] = useState<"frequency" | "occasional" | "">("")
+    const [isModalCatErrorVisible, SetIsModalCatErrorVisible] = useState(false)
+    const [texError, setTextError] = useState('')
 
     const {
         control,
         handleSubmit,
         setValue,
         watch,
+        reset,
         formState: { errors },
     } = useForm<FormValues>({
-        resolver: yupResolver(schema),
+        resolver: yupResolver(addBudgeschema),
         defaultValues: {
             title: '',
             baseAmount: 0,
             currency: 'COP',
-            Frequency: '',
+            frequency: '',
             startDate: new Date(),
             endDate: new Date(),
         },
     });
 
-    const handleSubmitForm = (data: FormValues) => {
-        console.log("Datos enviados:", data);
+    const allFields = useWatch({ control });
+
+    const theme = useTheme();
+    const styles = createStyles(theme);
+
+    const closeModal = () => {
+        setModalVisible(false)
+    }
+
+    const closeCategoryModal = () => {
+        SetIsModalCatErrorVisible(false)
+    }
+
+    const baseBudgetAmount = watch('baseAmount')
+
+
+    const handleAddCategory = (type: categoryType, name: string, baseAmount: number) => {
+
+        const currentCatAmount = categories.reduce((total, cat) => total += cat.baseAmount, 0)
+        console.log("esta es la baseamount actual de las categorias", currentCatAmount);
+
+        if (currentCatAmount + baseAmount > (allFields.baseAmount ?? 0)) {
+            setTextError(`El monto ingresado supera el saldo disponible del presupuesto.\nDisponible: ${baseBudgetAmount - currentCatAmount} ${allFields.currency}`)
+            SetIsModalCatErrorVisible(true)
+
+            return;
+        }
+
+        setCategories((prevCategories) => {
+            const updatedCategories = [...prevCategories, { type, name, baseAmount }];
+            console.log("categorias seleccionadas", updatedCategories);
+            return updatedCategories;
+        });
+
+    };
+
+    const openModal = () => {
+        setModalVisible(true)
+    }
+
+    const handleClose = () => {
+        onClose();
     };
 
 
-    const frequency = watch('Frequency');
+    const { submitBudget } = useSubmitBudget();
 
-    const validateFrequency = () => {
-        const currentDate = subHours(new Date, 5)
+    const handleSubmitForm = (data: FormValues) => {
+        console.log("!!!!!!!!!!!!!estas son las fechas!!!!!!!!!!!!!!!!!", data.startDate, data.endDate);
+        
+        const dataToSend = {
+            ...data,
+            ...(data.frequency === 'once'
+                ? { type: 'occasional', frequency: undefined }
+                : { type: budgetType })
+        };
 
-        let newDates: NewDates = {
-            startDate: new Date(),
-            endDate: new Date()
-        }
-        switch (frequency) {
-            case 'montly':
-                newDates.startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-                console.log("Esta es la fecha de inicio", newDates.startDate);
+        console.log("Datos enviados:", dataToSend, "categorias", categories);
 
-                newDates.endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-                console.log("Esta es la fecha de fin", newDates.endDate);
-                break;
+        submitBudget(dataToSend, categories, () => {
+            console.log("Presupuesto y categorías creadas con éxito.");
+            onSuccess();
+            onClose();
+            reset();
+        });
+    };
 
-            case 'biweekly':
-                const dayOfMonth = currentDate.getDate()
-                console.log("Este es el dia del mes", dayOfMonth);
-                if (dayOfMonth >= 15) {
-                    newDates.startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 16);
-                    console.log("Esta es la fecha de inicio", newDates.startDate);
-                    newDates.endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-                    console.log("Esta es la fecha de fin", newDates.endDate);
-                } else {
-                    newDates.startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-                    console.log("Esta es la fecha de inicio", newDates.startDate);
-                    newDates.endDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 15);
-                    console.log("Esta es la fecha de fin", newDates.endDate);
-                }
-                break;
+    const frequency = watch('frequency');
 
-            case 'weekly':
-                newDates.startDate = startOfWeek(currentDate, { weekStartsOn: 1 })
-                console.log("Esta es la fecha de inicio", newDates.startDate);
-                newDates.endDate = addDays(newDates.startDate, 6);
-                console.log("Esta es la fecha de fin", newDates.endDate);
-                break;
-        }
-
-        setValue('startDate', newDates.startDate);
-        setValue('endDate', newDates.endDate);
+    const validateFrequencyDates = () => {
+        const [startDate, endDate] = validateFrequency(frequency)
+        setValue('startDate', startDate);
+        setValue('endDate', endDate);
         setButtonDisabled(true)
-
         if (frequency === 'once') {
             setButtonDisabled(false)
         }
-
     }
 
     useEffect(() => {
         console.log('este es frequency', frequency);
-        validateFrequency()
+        validateFrequencyDates()
+        setBudgetType(frequency === "once" ? "occasional" : "frequency")
     }, [frequency]);
 
 
@@ -390,7 +204,7 @@ const AddBudgetForm: React.FC<IAddBudgetProps> = ({ visible, onClose }) => {
             errors,
         },
         {
-            name: 'Frequency',
+            name: 'frequency',
             label: 'Frecuencia',
             type: 'radio',
             options: [
@@ -405,34 +219,52 @@ const AddBudgetForm: React.FC<IAddBudgetProps> = ({ visible, onClose }) => {
     ];
 
     return (
-        <Modal
-            transparent={true}
-            animationType="slide"
+
+        <ReusableModal
             visible={visible}
-            onRequestClose={onClose}
+            onClose={handleClose}
         >
-            <ScrollView>
-                <View style={styles.modalContent}>
-                    <CustomButton
-                        title=""
-                        onPress={onClose}
-                        iconName="closesquare"
-                        size={35}
-                        IconComponent={AntDesign}
-                        style={styles.closeButton}
-                        color={theme.colors.text}
-                    />
-                    <ReusableForm
-                        inputs={inputs} 
-                    />
-                        <CustomButton
-                        title="Enviar"
-                        onPress={handleSubmit(handleSubmitForm)}
-                    />
-                </View>
-            </ScrollView>
-        </Modal>
-    );
+
+
+            <View style={styles.containerModal}>
+                <ReusableForm
+                    inputs={inputs}
+
+                />
+                <CustomButton
+                    title="Agregar Categorias"
+                    onPress={openModal}
+                    style={styles.addCatButton}
+                    textStyle={{ color: theme.colors.text, fontSize: 20, fontWeight: '400' }}
+                    iconName='category'
+                    size={20}
+                    IconComponent={MaterialIcons}
+                    color={theme.colors.text}
+                />
+                <CustomButton
+                    title="Enviar"
+                    onPress={handleSubmit(handleSubmitForm)}
+                />
+
+            </View>
+
+            <ModalCategories
+                visible={isModalVisible}
+                onClose={closeModal}
+                onCategorySelect={handleAddCategory}
+
+            />
+            <CustomModalConfirmComponent
+                visible={isModalCatErrorVisible}
+                onClose={closeCategoryModal}
+                text={texError}
+
+            />
+
+        </ReusableModal>
+
+
+    )
 };
 
 export default AddBudgetForm;
@@ -441,24 +273,23 @@ const { width, height } = Dimensions.get('window');
 
 const createStyles = (theme: Theme) =>
     StyleSheet.create({
-        modalContent: {
-            minHeight: height,
-            backgroundColor: theme.colors.background,
-            justifyContent: 'space-evenly',
-            padding: 20,
+        containerModal: {
+            alignItems: 'center',
+            gap: 20
         },
-        closeButton: {
-            backgroundColor: 'transparent',
-            width: 'auto',
-            alignSelf: 'flex-end',
-            padding: 0,
+        addCatButton: {
+            width: width * 0.85,
+            backgroundColor: theme.colors.background,
+            borderWidth: 1,
+            borderColor: theme.colors.card,
+            borderBlockEndColor: theme.colors.notification,
         },
         input: {
             borderColor: theme.colors.card,
             borderBlockEndColor: theme.colors.notification,
         },
         inputAmount: {
-            width: width * 0.53,
+            width: width * 0.5,
         },
         form: {
             flexDirection: 'row',
@@ -470,4 +301,7 @@ const createStyles = (theme: Theme) =>
         buttonSend: {
             alignSelf: "center"
         },
+        loadingContainer: {
+
+        }
     });

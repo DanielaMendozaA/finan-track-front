@@ -7,6 +7,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { Dimensions } from 'react-native';
 import CustomButton from "../atoms/CustomTouchableButton";
+import { subHours } from 'date-fns';
 
 export enum KeyboardTypeEnum {
     NUMERIC = 'numeric',
@@ -37,13 +38,13 @@ interface IFormProps<T extends FieldValues> {
     style?: object;
     // navLink?: { path: string; text: string; onPress: () => void };
     // buttonText?: string
-}   
+}
 
 
 const ReusableForm = <T extends FieldValues>({ inputs, style }: IFormProps<T>) => {
 
 
-
+    const [visiblePickers, setVisiblePickers] = useState<{ [key: string]: boolean }>({});
     const [showPicker, setShowPicker] = useState(false);
     const theme = useTheme();
     const styles = createStyles(theme);
@@ -56,14 +57,15 @@ const ReusableForm = <T extends FieldValues>({ inputs, style }: IFormProps<T>) =
     };
     const handleShowPicker = () => setShowPicker(true);
 
+    const togglePicker = (name: string) => {
+        setVisiblePickers((prev) => ({ ...prev, [name]: !prev[name] }));
+    };
+
 
     return (
         <View style={styles.form}>
             {inputs.map((input, index) => (
-
-
-
-                <View key={index} style={[styles.form, style]}>
+                <View key={index}>
 
                     <Controller
                         control={input.control}
@@ -89,7 +91,10 @@ const ReusableForm = <T extends FieldValues>({ inputs, style }: IFormProps<T>) =
                                                 placeholder={input.placeholder}
                                                 placeholderTextColor={theme.colors.text}
                                                 onBlur={onBlur}
-                                                onChangeText={onChange}
+                                                onChangeText={(text) => {
+                                                    console.log("Valor ingresado:", text);
+                                                    onChange(text);
+                                                  }}
                                                 value={value}
                                                 keyboardType={keyboardType}
 
@@ -205,12 +210,8 @@ const ReusableForm = <T extends FieldValues>({ inputs, style }: IFormProps<T>) =
                                             )}
 
                                             <CustomButton
-                                                title={
-                                                    !isNaN(value.getTime())
-                                                        ? value.toISOString().split('T')[0]
-                                                        : new Date().toISOString().split('T')[0]
-                                                }
-                                                onPress={handleShowPicker}
+                                                title={value?.toISOString().split('T')[0] || "Selecciona Fecha"}
+                                                onPress={() => togglePicker(input.name)}
                                                 iconName={input.disabled ? undefined : "arrow-drop-down"}
                                                 size={25}
                                                 color={theme.colors.notification}
@@ -221,16 +222,14 @@ const ReusableForm = <T extends FieldValues>({ inputs, style }: IFormProps<T>) =
                                                 disabled={input.disabled}
                                             />
 
-                                            {showPicker && (
+                                            {visiblePickers[input.name] && (
                                                 <DateTimePicker
                                                     value={value || new Date()}
                                                     mode="date"
                                                     display="spinner"
-                                                    onChange={(event, date) => {
-                                                        setShowPicker(false);
-                                                        if (date) {
-                                                            onChange(date);
-                                                        }
+                                                    onChange={(event, selectedDate) => {
+                                                        onChange(selectedDate || value);
+                                                        togglePicker(input.name);
                                                     }}
                                                 />
                                             )}
@@ -244,8 +243,8 @@ const ReusableForm = <T extends FieldValues>({ inputs, style }: IFormProps<T>) =
 
                     {input.errors && input.errors[input.name] && input.errors[input.name]?.message && (
                         <Text
-                        style={{color: theme.colors.primary}}
-                        
+                            style={{ color: theme.colors.primary }}
+
                         >{String(input.errors[input.name]?.message)}</Text>
                     )}
                 </View>
@@ -272,7 +271,7 @@ const createStyles = (theme: Theme) =>
             flexDirection: 'row',
             flexWrap: 'wrap',
             justifyContent: 'center',
-            gap: '5%',
+            gap: 25,
 
         },
         radioGroup: {

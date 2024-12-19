@@ -1,19 +1,19 @@
-import React, { useState } from 'react'
-import { ActivityIndicator, Dimensions, StyleSheet, Text, View } from 'react-native';
-import { Theme, useTheme } from '@react-navigation/native';
+import React from 'react'
+import { ActivityIndicator, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Theme, useNavigation, useTheme } from '@react-navigation/native';
 
 import { isBefore, isWithinInterval } from "date-fns";
 import { subHours } from "date-fns";
 
 
-import { useFetchGetBudgets } from '../../hooks/budgets/useFetchGetBudgets'
 import ReusableFlatList from '../molecules/CustomFlatList';
 import { IBudget } from '../../services/budgets/interfaces/get-all-budgets-response.interface';
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { BarProgress } from '../molecules/BarProgress';
+import { DrawerSingleBudgetNavigationProp } from '../../navigation/types/types';
 
 
-const validateDates = (start: Date, end: Date) => {
+const validateDates = (start: string, end: string) => {
 
     const currentDate = subHours(new Date(), 5);
 
@@ -38,22 +38,6 @@ const validateDates = (start: Date, end: Date) => {
 };
 
 
-// const formatDateManual = (dateString: string) => {
-//     const months = [
-//         "enero", "febrero", "marzo", "abril", "mayo", "junio",
-//         "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-//     ];
-
-//     const date = new Date(dateString);
-//     const day = date.getDate().toString().padStart(2, '0');
-//     // const month = months[date.getMonth()];
-//     const month = date.getMonth();
-
-//     const year = date.getFullYear();
-
-//     return `${day} - ${month} - ${year}`;
-// };
-
 interface IBudgetListProp {
     data: IBudget[];
     loading: boolean
@@ -61,7 +45,7 @@ interface IBudgetListProp {
 }
 
 export const BudgetList: React.FC<IBudgetListProp> = ({ data, loading }) => {
-
+    const navigation = useNavigation<DrawerSingleBudgetNavigationProp>(); 
 
     const theme = useTheme()
     const styles = createStyles(theme)
@@ -74,20 +58,23 @@ export const BudgetList: React.FC<IBudgetListProp> = ({ data, loading }) => {
 
         const availableProgress = Math.round((+item.currentAmount / +item.baseAmount) * 100);
 
-
-        let textColorAvailable
-        if (+item.baseAmount === +item.currentAmount || +item.currentAmount > (+item.baseAmount / 2)) {
-            textColorAvailable = '#35bf35'
+        let textColorAvailable;
+        if (+item.currentAmount < 0) {
+            textColorAvailable = '#ff0000'; 
+        } else if (+item.baseAmount === +item.currentAmount || +item.currentAmount > (+item.baseAmount / 2)) {
+            textColorAvailable = '#35bf35'; 
         } else if (+item.currentAmount === (+item.baseAmount / 2) || +item.currentAmount < (+item.baseAmount / 2)) {
-            textColorAvailable = '#e89e27'
-        } else {
-            textColorAvailable = '#e64e20'
+            textColorAvailable = '#e89e27'; 
+        } else if (+item.baseAmount - +item.currentAmount < 0) {
+            textColorAvailable = '#e64e20'; 
+        }
+        const handleNavigationToSingle = () => {
+            navigation.navigate('SingleBudget', {budget: item})
         }
 
 
         return (
-            <View style={styles.mainContainer}>
-
+            <TouchableOpacity onPress={handleNavigationToSingle} activeOpacity={0.8}>
                 <View style={{ borderRadius: 30, overflow: 'hidden', marginBottom: 20 }}>
 
 
@@ -128,7 +115,7 @@ export const BudgetList: React.FC<IBudgetListProp> = ({ data, loading }) => {
                                         style={styles.itemText}
                                     >Gastado: </Text>
                                     <Text
-                                        style={[styles.itemText, { color: theme.colors.primary}, styles.itemTextNumber]}
+                                        style={[styles.itemText, { color: theme.colors.primary }, styles.itemTextNumber]}
                                     >{`${+item.baseAmount - +item.currentAmount} ${item.currency}`}</Text>
                                 </Text>
                             </View>
@@ -158,16 +145,16 @@ export const BudgetList: React.FC<IBudgetListProp> = ({ data, loading }) => {
 
                             }]}
                         >
-                            {validateDates(item.startDate || new Date(), item.endDate || new Date())}
+                            {validateDates(item.startDate || new Date().toISOString(), item.endDate || new Date().toISOString())}
                         </Text>
 
 
                     </View>
-                    
+
                 </View>
+                </TouchableOpacity>
 
 
-            </View>
         );
     };
 
@@ -189,6 +176,7 @@ export const BudgetList: React.FC<IBudgetListProp> = ({ data, loading }) => {
                 renderItem={renderItem}
                 keyExtractor={keyExtractor}
                 isLoading={loading}
+                emptyMessage='No hay presupuestos disponibles'
             />
         </View>
     )
@@ -197,9 +185,6 @@ export const BudgetList: React.FC<IBudgetListProp> = ({ data, loading }) => {
 const { width, height } = Dimensions.get('window');
 const createStyles = (theme: Theme) =>
     StyleSheet.create({
-        mainContainer: {
-            gap: 20
-        },
         loadingContainer: {
             flex: 1,
             justifyContent: 'center',
@@ -212,7 +197,7 @@ const createStyles = (theme: Theme) =>
 
         },
         itemText: {
-            color: theme.colors.text,
+            color: theme.colors.notification,
             fontSize: 15,
             fontWeight: '400'
         },

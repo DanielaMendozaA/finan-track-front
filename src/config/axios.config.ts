@@ -3,7 +3,7 @@ import axios, { AxiosInstance } from 'axios';
 
 // export const baseUrl = 'http://192.168.88.195:3002/api/v1/';    
 
-export const baseUrl = 'http://192.168.1.58:3002/api/v1/';
+export const baseUrl = 'https://finan-track-back.onrender.com:3002/api/v1/';
 
 const axiosInstanceBack: AxiosInstance = axios.create({
     baseURL: baseUrl,

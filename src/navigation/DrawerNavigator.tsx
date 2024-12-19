@@ -13,6 +13,7 @@ import { AppDispatch } from '../redux/store';
 import { useDispatch } from 'react-redux';
 import { removeToken } from '../redux/features/userThunks';
 import { ThemeContext } from '../theme/theme.context';
+import { SingleBudgetScreen } from '../screens/private/SingleBudget.screen';
 
 
 
@@ -63,7 +64,7 @@ const CustomDrawerContent = () => {
         <View style={styles.containerDrawerButtons}>
             <CustomButton
                 title="Ir a Home"
-                onPress={() => navigationHome.navigate('Home')}
+                onPress={() => navigationHome.navigate('Home', { reload: false })}
                 iconName='home-filled'
                 color={theme.colors.text}
                 IconComponent={MaterialIcons}
@@ -135,6 +136,11 @@ export const DrawerNavigator = () => {
             <Drawer.Screen
                 name="Settings"
                 component={SettingsScreen}
+
+            />
+            <Drawer.Screen
+                name="SingleBudget"
+                component={SingleBudgetScreen}
 
             />
         </Drawer.Navigator>
